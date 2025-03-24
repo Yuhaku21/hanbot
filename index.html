@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background: #1e1e1e;
+        color: white;
+        margin: 0;
+        padding: 0;
+      }
+      #chat-box {
+        width: 90%;
+        max-width: 400px;
+        height: 90vh;
+        background: #2c2c2c;
+        color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      #chat-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+      }
+      .message {
+        padding: 10px;
+        margin: 5px;
+        border-radius: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+      }
+      .user {
+        background: #4a90e2;
+        align-self: flex-end;
+        color: white;
+      }
+      .bot {
+        background: #3b3b3b;
+        align-self: flex-start;
+        color: white;
+      }
+      #input-container {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #444;
+        background: #333;
+      }
+      input {
+        flex: 1;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #555;
+        outline: none;
+        background: #222;
+        color: white;
+      }
+      button {
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        background: green;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-left: 10px;
+      }
+      button:hover {
+        background: #50ff4769;
+      }
+      @media (max-width: 600px) {
+        #chat-box {
+          height: 90vh;
+        }
+        input,
+        button {
+          font-size: 14px;
+          padding: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Chat dengan AI</h2>
+    <p>Made By Yuhaku21</p>
+    <div id="chat-box" style="margin-bottom: 100px">
+      <div id="chat-container"></div>
+      <div id="input-container">
+        <input type="text" id="user-input" placeholder="Ketik pesan..." />
+        <button onclick="sendMessage()">Kirim</button>
+      </div>
+    </div>
+
+    <script>
+      const apiKey = "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";
+      const chatContainer = document.getElementById("chat-container");
+
+      function sendMessage() {
+        const userInput = document.getElementById("user-input").value;
+        if (!userInput) return;
+
+        appendMessage("Anda: " + userInput, "user");
+        document.getElementById("user-input").value = "";
+
+        fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "openai/gpt-3.5-turbo",
+            messages: [{ role: "user", content: userInput }],
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const botResponse = data.choices[0].message.content;
+            appendMessage("AI: " + botResponse, "bot");
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            appendMessage("AI: Terjadi kesalahan saat menghubungi API.", "bot");
+          });
+      }
+
+      function appendMessage(message, sender) {
+        const messageElement = document.createElement("div");
+        messageElement.textContent = message;
+        messageElement.classList.add("message", sender);
+        chatContainer.appendChild(messageElement);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
